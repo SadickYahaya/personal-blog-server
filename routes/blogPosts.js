@@ -4,13 +4,12 @@ const path = require('path');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 
-// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Folder where files will be stored
+    cb(null, 'uploads/'); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // File name with timestamp
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
 
@@ -18,8 +17,8 @@ const upload = multer({ storage });
 
 // Create a new blog post
 router.post('/', upload.single('image'), async (req, res) => {
-  console.log('File:', req.file); // Debugging: Check if file is uploaded
-  console.log('Body:', req.body); // Debugging: Check if other fields are correct
+  console.log('File:', req.file); 
+  console.log('Body:', req.body); 
 
   if (!req.file) {
     return res.status(400).json({ message: 'Image file is required' });
@@ -31,11 +30,12 @@ router.post('/', upload.single('image'), async (req, res) => {
       author: req.body.author,
       date: req.body.date,
       description: req.body.description,
-      image: req.file.path // Save the file path to the database
+      image: req.file.path 
     });
     await blogPost.save();
     res.status(201).json(blogPost);
   } catch (err) {
+    console.error('Error saving blog post:', err); 
     res.status(500).json({ message: err.message });
   }
 });
@@ -46,6 +46,7 @@ router.get('/', async (req, res) => {
     const blogPosts = await BlogPost.find();
     res.json(blogPosts);
   } catch (err) {
+    console.error('Error fetching blog posts:', err); 
     res.status(500).json({ message: err.message });
   }
 });
@@ -57,14 +58,15 @@ router.get('/:id', async (req, res) => {
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
     res.json(blogPost);
   } catch (err) {
+    console.error('Error fetching blog post:', err); // More detailed logging
     res.status(500).json({ message: err.message });
   }
 });
 
 // Update a blog post by ID
 router.put('/:id', upload.single('image'), async (req, res) => {
-  console.log('File:', req.file); // Debugging: Check if file is uploaded
-  console.log('Body:', req.body); // Debugging: Check if other fields are correct
+  console.log('File:', req.file); 
+  console.log('Body:', req.body); 
 
   const updatedData = {
     title: req.body.title,
@@ -82,6 +84,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
     res.json(blogPost);
   } catch (err) {
+    console.error('Error updating blog post:', err); // More detailed logging
     res.status(500).json({ message: err.message });
   }
 });
@@ -93,6 +96,7 @@ router.delete('/:id', async (req, res) => {
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
     res.json({ message: 'Blog post deleted' });
   } catch (err) {
+    console.error('Error deleting blog post:', err); // More detailed logging
     res.status(500).json({ message: err.message });
   }
 });
