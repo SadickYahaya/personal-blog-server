@@ -15,7 +15,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Create a new blog post
 router.post('/', upload.single('image'), async (req, res) => {
   console.log('File:', req.file); 
   console.log('Body:', req.body); 
@@ -25,13 +24,17 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 
   try {
+    // Normalize the image path to use forward slashes
+    const imagePath = req.file.path.replace(/\\/g, '');
+    
     const blogPost = new BlogPost({
       title: req.body.title,
       author: req.body.author,
       date: req.body.date,
       description: req.body.description,
-      image: req.file.path 
+      image: imagePath
     });
+    
     await blogPost.save();
     res.status(201).json(blogPost);
   } catch (err) {
@@ -39,6 +42,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 // Get all blog posts
 router.get('/', async (req, res) => {
