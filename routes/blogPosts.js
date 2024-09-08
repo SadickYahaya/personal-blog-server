@@ -25,7 +25,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
   try {
     // Normalize the image path to use forward slashes
-    const imagePath = req.file.path.replace(/\\/g, '');
+    const imagePath = req.file.path.replace(/\\/g, '/');
     
     const blogPost = new BlogPost({
       title: req.body.title,
