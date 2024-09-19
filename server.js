@@ -24,7 +24,8 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/blogPosts', require('./routes/blogPosts'));
 app.use('/api/projects', require('./routes/projects'));
-// app.use('/api', tagRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/tags', require('./routes/tags'));
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

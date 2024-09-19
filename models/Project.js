@@ -1,15 +1,10 @@
 const mongoose = require('mongoose');
-
-const TagSchema = new mongoose.Schema({
-  tag: { type: String, required: true },
-  textColor: { type: String, required: true },
-  bgColor: { type: String, required: true },
-});
+const Tag = require('./Tag'); // Import the Tag model
 
 const ProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  tags: [TagSchema], // Renamed from 'pins' to 'tags'
+  tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }], // Reference to Tag
   image: { type: String, required: true },
 });
 
