@@ -1,21 +1,25 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
 
+// Configure multer for file storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+  destination: function (req, file, cb) {
+    const uploadPath = path.join('/opt/render/project/src', 'uploads');
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {
@@ -85,16 +89,18 @@ async function sendNewsletterEmails(blogPost) {
 // Create a new blog post
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const imagePath = req.file ? req.file.path.replace(/\\/g, '/') : '';
-    const tagIds = req.body.tags ? req.body.tags.split(',') : [];
+    let imageUrl = '';
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
 
     const blogPost = new BlogPost({
       title: req.body.title,
       author: req.body.author,
       date: req.body.date,
       description: req.body.description,
-      image: imagePath,
-      tags: req.body.tags,
+      image: imageUrl,
+      tags: req.body.tags ? req.body.tags.split(',') : [],
     });
 
     await blogPost.save();
@@ -143,7 +149,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   };
 
   if (req.file) {
-    updatedData.image = req.file.path.replace(/\\/g, '/');
+    updatedData.image = `/uploads/${req.file.filename}`;
   }
 
   try {
