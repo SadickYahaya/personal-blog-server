@@ -81,12 +81,14 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   };
 
   if (req.file) {
-    updatedData.image = req.file.path.replace(/\\/g, '/');
+    updatedData.image = `/uploads/projects/${req.file.filename}`;
+    console.log('Updated image URL:', updatedData.image);
   }
 
   try {
-    const project = await Project.findByIdAndUpdate(req.params.id, updatedData, { new: true }).populate('tags');
+    const project = await Project.findByIdAndUpdate(req.params.id, updatedData, { new: true });
     if (!project) return res.status(404).json({ message: 'Project not found' });
+    console.log('Updated project:', project);
     res.json(project);
   } catch (err) {
     console.error('Error updating project:', err);
