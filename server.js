@@ -41,3 +41,4 @@ app.use('/api/blogPosts', require('./routes/blogPosts'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/tags', require('./routes/tags'));
+app.use('/api/newsletter', require('./routes/newsletter'));

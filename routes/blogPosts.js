@@ -3,7 +3,8 @@ const multer = require('multer');
 const path = require('path');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
-// const Tag = require('../models/Tag');
+const Subscriber = require('../models/Subscriber');
+const nodemailer = require('nodemailer');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,6 +16,36 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+// Function to send newsletter emails
+async function sendNewsletterEmails(blogPost) {
+  const subscribers = await Subscriber.find().select('email');
+  
+  // Configure nodemailer (replace with your email service settings)
+  let transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  for (let subscriber of subscribers) {
+    await transporter.sendMail({
+      from: '"Your Blog Name" <your@email.com>',
+      to: subscriber.email,
+      subject: `New Blog Post: ${blogPost.title}`,
+      html: `
+        <h1>${blogPost.title}</h1>
+        <p>By ${blogPost.author} on ${blogPost.date}</p>
+        <p>${blogPost.description}</p>
+        <a href="${process.env.FRONTEND_URL}/blog/${blogPost._id}">Read More</a>
+      `,
+    });
+  }
+}
 
 // Create a new blog post
 router.post('/', upload.single('image'), async (req, res) => {
@@ -32,6 +63,10 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
 
     await blogPost.save();
+    
+    // Send newsletter emails
+    await sendNewsletterEmails(blogPost);
+    
     res.status(201).json(blogPost);
   } catch (err) {
     console.error('Error saving blog post:', err);
