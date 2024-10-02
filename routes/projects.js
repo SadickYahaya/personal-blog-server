@@ -1,35 +1,47 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const Project = require('../models/Project');
 // const Tag = require('../models/Tag');
 
+// Configure multer for file storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(process.cwd(), 'uploads', 'projects');
+    fs.mkdirSync(uploadPath, { recursive: true });
+    console.log('Upload path:', uploadPath);
+    cb(null, uploadPath);
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
 // Create a new project
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const imagePath = req.file ? req.file.path.replace(/\\/g, '/') : '';
-    const tagIds = req.body.tags ? req.body.tags.split(',') : [];
+    console.log('Received file:', req.file);
+    let imageUrl = '';
+    if (req.file) {
+      imageUrl = `/uploads/projects/${req.file.filename}`;
+      console.log('Image URL:', imageUrl);
+    }
 
     const project = new Project({
       title: req.body.title,
       description: req.body.description,
-      image: imagePath,
-      tags: req.body.tags,
+      image: imageUrl,
+      tags: req.body.tags ? req.body.tags.split(',') : [],
     });
 
     await project.save();
+    console.log('Saved project:', project);
+    
     res.status(201).json(project);
   } catch (err) {
     console.error('Error saving project:', err);
