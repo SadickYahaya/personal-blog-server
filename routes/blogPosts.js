@@ -10,12 +10,14 @@ const nodemailer = require('nodemailer');
 // Configure multer for file storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join('/opt/render/project/src', 'uploads');
+    const uploadPath = path.join(process.cwd(), 'uploads');
     fs.mkdirSync(uploadPath, { recursive: true });
+    console.log('Upload path:', uploadPath);
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
 
@@ -89,9 +91,11 @@ async function sendNewsletterEmails(blogPost) {
 // Create a new blog post
 router.post('/', upload.single('image'), async (req, res) => {
   try {
+    console.log('Received file:', req.file);
     let imageUrl = '';
     if (req.file) {
       imageUrl = `/uploads/${req.file.filename}`;
+      console.log('Image URL:', imageUrl);
     }
 
     const blogPost = new BlogPost({
@@ -104,6 +108,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
 
     await blogPost.save();
+    console.log('Saved blog post:', blogPost);
     
     // Send newsletter emails
     await sendNewsletterEmails(blogPost);
@@ -150,11 +155,13 @@ router.put('/:id', upload.single('image'), async (req, res) => {
 
   if (req.file) {
     updatedData.image = `/uploads/${req.file.filename}`;
+    console.log('Updated image URL:', updatedData.image);
   }
 
   try {
     const blogPost = await BlogPost.findByIdAndUpdate(req.params.id, updatedData, { new: true }).populate('tags');
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
+    console.log('Updated blog post:', blogPost);
     res.json(blogPost);
   } catch (err) {
     console.error('Error updating blog post:', err);
