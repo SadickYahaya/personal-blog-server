@@ -19,31 +19,66 @@ const upload = multer({ storage });
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {
-  const subscribers = await Subscriber.find().select('email');
-  
-  // Configure nodemailer (replace with your email service settings)
-  let transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  for (let subscriber of subscribers) {
-    await transporter.sendMail({
-      from: '"Your Blog Name" <your@email.com>',
-      to: subscriber.email,
-      subject: `New Blog Post: ${blogPost.title}`,
-      html: `
-        <h1>${blogPost.title}</h1>
-        <p>By ${blogPost.author} on ${blogPost.date}</p>
-        <p>${blogPost.description}</p>
-        <a href="${process.env.FRONTEND_URL}/blog/${blogPost._id}">Read More</a>
-      `,
+  try {
+    const subscribers = await Subscriber.find().select('email');
+    
+    console.log('Email configuration:', {
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: '********' // Don't log the actual password
+      },
     });
+
+    let transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Verify the connection configuration
+    await transporter.verify();
+    console.log('SMTP connection verified successfully');
+
+    for (let subscriber of subscribers) {
+      await transporter.sendMail({
+        from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
+        to: subscriber.email,
+        subject: `${blogPost.title}`,
+        html: `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+              h1 { color: #2c3e50; }
+              .meta { font-style: italic; color: #7f8c8d; }
+              .description { margin: 20px 0; }
+              .cta-button { display: inline-block; background-color: #3498db; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; }
+            </style>
+          </head>
+          <body>
+            <h1>${blogPost.title}</h1>
+            <p class="meta">By ${blogPost.author} on ${new Date(blogPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <div class="description">${blogPost.description}</div>
+            <a href="${process.env.FRONTEND_URL}/blog/${blogPost._id}" class="cta-button">Read More</a>
+          </body>
+          </html>
+        `,
+      });
+    }
+    console.log('All newsletter emails sent successfully');
+  } catch (error) {
+    console.error('Error sending newsletter emails:', error);
+    throw error;
   }
 }
 
