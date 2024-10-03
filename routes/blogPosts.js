@@ -164,14 +164,14 @@ router.get('/others', async (req, res) => {
   }
 });
 
-// Modify the GET route for a single blog post to include comments
+// Get a single blog post by ID
 router.get('/:id', async (req, res) => {
   try {
     const blogPost = await BlogPost.findById(req.params.id).populate('tags');
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
     
     // Fetch comments for this blog post
-    const comments = await Comment.find({ post: req.params.id }).populate('user', 'name');
+    const comments = await Comment.find({ post: req.params.id });
     
     // Add comments to the blogPost object
     const blogPostWithComments = blogPost.toObject();
