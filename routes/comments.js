@@ -52,13 +52,13 @@ router.delete('/:id', async (req, res) => {
     if (!comment) {
       return res.status(404).json({ message: 'Comment not found' });
     }
-    await comment.remove();
-    res.json({ message: 'Comment removed' });
+    await Comment.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Comment deleted successfully' });
   } catch (error) {
+    console.error('Error deleting comment:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// We'll remove update and delete routes as they're not needed for this use case
 
 module.exports = router;
