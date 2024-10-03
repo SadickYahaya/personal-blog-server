@@ -5,7 +5,7 @@ const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
-const { upload, isProduction } = require('../helpers/imageUpload');
+const { upload } = require('../helpers/imageUpload');
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Function to send newsletter emails
