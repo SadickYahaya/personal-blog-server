@@ -19,7 +19,7 @@ if (isProduction) {
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-      folder: 'portfolio_uploads', // You can change this folder name
+      folder: 'portfolio_uploads', 
       allowed_formats: ['jpg', 'png', 'jpeg', 'gif'],
     },
   });

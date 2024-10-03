@@ -86,7 +86,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     console.log('Received file:', req.file);
     let imageUrl = '';
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+      imageUrl = `/${req.file.filename}`;
       console.log('Image URL:', imageUrl);
     }
 
@@ -146,7 +146,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   };
 
   if (req.file) {
-    updatedData.image = `/uploads/${req.file.filename}`;
+    updatedData.image = `/${req.file.filename}`;
     console.log('Updated image URL:', updatedData.image);
   }
 
