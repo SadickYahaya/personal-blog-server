@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.NODE_ENV === 'production' 
   ? process.env.MONGO_URL_PROD 
   : process.env.MONGO_URL_DEV;

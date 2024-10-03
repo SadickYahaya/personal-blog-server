@@ -1,15 +1,21 @@
 version: 1
-applications:
-  - appRoot: .
-    backend:
-      phases:
-        build:
-          commands:
-            - npm ci
-      artifacts:
-        baseDirectory: .
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - node_modules/**/*
+backend:
+  phases:
+    build:
+      commands:
+        - npm install
+    test:
+      commands:
+        - npm test
+frontend:
+  phases:
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: build
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
