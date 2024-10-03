@@ -1,11 +1,7 @@
 const express = require('express');
-const multer = require('multer');
 const router = express.Router();
 const Project = require('../models/Project');
-const configureStorage = require('../utils/fileStorage');
-
-// Use the configureStorage utility
-const upload = multer({ storage: configureStorage('uploads/projects') });
+const upload = require('../helpers/imageUpload');
 
 // Create a new project
 router.post('/', upload.single('image'), async (req, res) => {

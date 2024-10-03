@@ -1,16 +1,11 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
-const configureStorage = require('../utils/fileStorage');
 const upload = require('../helpers/imageUpload');
-
-// Use the configureStorage utility
-const upload = multer({ storage: configureStorage() });
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {

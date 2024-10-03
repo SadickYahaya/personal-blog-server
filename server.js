@@ -49,4 +49,4 @@ app.use('/api/tags', require('./routes/tags'));
 app.use('/api/newsletter', require('./routes/newsletter'));
 
 // Add this new route for file uploads
-app.use('/api/upload', require('./routes/uploadRoute'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
