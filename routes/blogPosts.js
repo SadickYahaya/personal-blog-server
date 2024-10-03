@@ -123,7 +123,46 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a single blog post by ID
+router.get('/recent', async (req, res) => {
+  try {
+    const recentPosts = await BlogPost.find()
+      .sort({ date: -1 })
+      .limit(3)
+      .populate('tags');
+    if (recentPosts.length === 0) return res.status(404).json({ message: 'No blog posts found' });
+    res.json(recentPosts);
+  } catch (err) {
+    console.error('Error fetching recent blog posts:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+router.get('/others', async (req, res) => {
+  try {
+    // Get the 4 most recent posts
+    const recentPosts = await BlogPost.find()
+      .sort({ date: -1 })
+      .limit(3);
+
+    const recentPostIds = recentPosts.map(post => post._id);
+
+    // Find all posts except the recent ones
+    const otherPosts = await BlogPost.find({ _id: { $nin: recentPostIds } })
+      .sort({ date: -1 })
+      .populate('tags');
+
+    if (otherPosts.length === 0) {
+      return res.status(404).json({ message: 'No additional blog posts found' });
+    }
+
+    res.json(otherPosts);
+  } catch (err) {
+    console.error('Error fetching other blog posts:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const blogPost = await BlogPost.findById(req.params.id).populate('tags');
@@ -135,7 +174,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update a blog post by ID
 router.put('/:id', upload.single('image'), async (req, res) => {
   const updatedData = {
     title: req.body.title,
