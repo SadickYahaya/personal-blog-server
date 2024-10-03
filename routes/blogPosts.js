@@ -6,6 +6,7 @@ const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
 const upload = require('../helpers/imageUpload');
+const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {
@@ -18,7 +19,7 @@ async function sendNewsletterEmails(blogPost) {
       secure: process.env.EMAIL_SECURE === 'true',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: '********' // Don't log the actual password
+        pass: '********' 
       },
     });
 
@@ -37,6 +38,13 @@ async function sendNewsletterEmails(blogPost) {
     console.log('SMTP connection verified successfully');
 
     for (let subscriber of subscribers) {
+      // Parse the description content
+      const descriptionContent = JSON.parse(blogPost.description);
+      
+      // Convert Quill Delta to HTML
+      const converter = new QuillDeltaToHtmlConverter(descriptionContent.ops, {});
+      const descriptionHtml = converter.convert();
+
       await transporter.sendMail({
         from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM_ADDRESS}>`,
         to: subscriber.email,
@@ -58,7 +66,7 @@ async function sendNewsletterEmails(blogPost) {
           <body>
             <h1>${blogPost.title}</h1>
             <p class="meta">By ${blogPost.author} on ${new Date(blogPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <div class="description">${blogPost.description}</div>
+            <div class="description">${descriptionHtml}</div>
             <a href="${process.env.FRONTEND_URL}/blog/${blogPost._id}" class="cta-button">Read More</a>
           </body>
           </html>
