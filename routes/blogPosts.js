@@ -7,6 +7,7 @@ const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
 const { upload } = require('../helpers/imageUpload');
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
+const Comment = require('../models/Comment'); 
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {
@@ -163,11 +164,20 @@ router.get('/others', async (req, res) => {
   }
 });
 
+// Modify the GET route for a single blog post to include comments
 router.get('/:id', async (req, res) => {
   try {
     const blogPost = await BlogPost.findById(req.params.id).populate('tags');
     if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
-    res.json(blogPost);
+    
+    // Fetch comments for this blog post
+    const comments = await Comment.find({ post: req.params.id }).populate('user', 'name');
+    
+    // Add comments to the blogPost object
+    const blogPostWithComments = blogPost.toObject();
+    blogPostWithComments.comments = comments;
+    
+    res.json(blogPostWithComments);
   } catch (err) {
     console.error('Error fetching blog post:', err);
     res.status(500).json({ message: err.message });
