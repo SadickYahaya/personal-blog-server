@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+  pre_build:
+    commands:
+      - npm install
+  build:
+    commands:
+      - npm run test
+      - npm run build
+      - zip -r function.zip .
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name portfolio-sadick-server --zip-file fileb://function.zip
+
+artifacts:
+  files:
+    - function.zip
