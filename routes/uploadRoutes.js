@@ -10,7 +10,7 @@ router.post('/', upload.single('image'), (req, res) => {
       imageUrl = req.file.path;
     } else {
       // In development, construct the URL for the locally saved file
-      imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      imageUrl = `${req.protocol}://${req.get('host')}/${req.file.filename}`;
     }
     console.log('File uploaded successfully');
     console.log('Image URL:', imageUrl);
