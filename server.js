@@ -20,6 +20,13 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
+// Serve static files from the uploads directory
+const uploadPath = process.env.NODE_ENV === 'production'
+  ? '/opt/render/project/src/uploads'
+  : path.join(__dirname, 'uploads');
+
+app.use('/uploads', express.static(uploadPath));
+
 // Connect to MongoDB
 mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
@@ -27,7 +34,6 @@ mongoose.connect(MONGO_URL, {
 })
 .then(() => {
   console.log('Connected to MongoDB');
-  const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 })
 .catch((error) => {
@@ -39,6 +45,8 @@ mongoose.connect(MONGO_URL, {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/blogPosts', require('./routes/blogPosts'));
 app.use('/api/projects', require('./routes/projects'));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/tags', require('./routes/tags'));
 app.use('/api/newsletter', require('./routes/newsletter'));
+
+// Add this new route for file uploads
+app.use('/api/upload', require('./routes/uploadRoute'));

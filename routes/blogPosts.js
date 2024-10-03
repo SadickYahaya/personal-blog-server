@@ -6,22 +6,11 @@ const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
 const nodemailer = require('nodemailer');
+const configureStorage = require('../utils/fileStorage');
+const upload = require('../helpers/imageUpload');
 
-// Configure multer for file storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(process.cwd(), 'uploads');
-    fs.mkdirSync(uploadPath, { recursive: true });
-    console.log('Upload path:', uploadPath);
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
+// Use the configureStorage utility
+const upload = multer({ storage: configureStorage() });
 
 // Function to send newsletter emails
 async function sendNewsletterEmails(blogPost) {

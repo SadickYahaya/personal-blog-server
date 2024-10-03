@@ -25,6 +25,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get a single tag by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const tag = await Tag.findById(req.params.id);
+    if (!tag) return res.status(404).json({ message: 'Tag not found' });
+    res.json(tag);
+  } catch (err) {
+    console.error('Error fetching tag:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Update a tag by ID
 router.put('/:id', async (req, res) => {
   try {

@@ -1,26 +1,11 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const router = express.Router();
 const Project = require('../models/Project');
-// const Tag = require('../models/Tag');
+const configureStorage = require('../utils/fileStorage');
 
-// Configure multer for file storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(process.cwd(), 'uploads', 'projects');
-    fs.mkdirSync(uploadPath, { recursive: true });
-    console.log('Upload path:', uploadPath);
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage: storage });
+// Use the configureStorage utility
+const upload = multer({ storage: configureStorage('uploads/projects') });
 
 // Create a new project
 router.post('/', upload.single('image'), async (req, res) => {
@@ -36,7 +21,7 @@ router.post('/', upload.single('image'), async (req, res) => {
       title: req.body.title,
       description: req.body.description,
       image: imageUrl,
-      tags: req.body.tags ? req.body.tags.split(',') : [],
+      tags: req.body.tags ? req.body.tags?.split(',') : [],
     });
 
     await project.save();
@@ -77,7 +62,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   const updatedData = {
     title: req.body.title,
     description: req.body.description,
-    tags: req.body.tags ? req.body.tags.split(',') : [],
+    tags: req.body.tags ? req.body.tags?.split(',') : [],
   };
 
   if (req.file) {
