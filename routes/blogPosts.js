@@ -4,7 +4,7 @@ const fs = require('fs');
 const router = express.Router();
 const BlogPost = require('../models/BlogPost');
 const Subscriber = require('../models/Subscriber');
-const nodemailer = require('nodemailer');
+const createTransporter = require('../helpers/emailService');
 const { upload } = require('../helpers/imageUpload');
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html').QuillDeltaToHtmlConverter;
 const Comment = require('../models/Comment'); 
@@ -24,15 +24,7 @@ async function sendNewsletterEmails(blogPost) {
       },
     });
 
-    let transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      secure: process.env.EMAIL_SECURE === 'true',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    let transporter = createTransporter();
 
     await transporter.verify();
     console.log('SMTP connection verified successfully');
@@ -46,7 +38,7 @@ async function sendNewsletterEmails(blogPost) {
       const descriptionHtml = converter.convert();
 
       await transporter.sendMail({
-        from: `"sadiqoncodes" <sadiqoncodes@gmail.com>`,
+        from: `"Sadiq on Codes" <sadiqoncodes+blog@gmail.com>`,
         to: subscriber.email,
         subject: `${blogPost.title}`,
         html: `
