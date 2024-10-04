@@ -68,7 +68,7 @@ async function sendNewsletterEmails(blogPost) {
             <h1>${blogPost.title}</h1>
             <p class="meta">By ${blogPost.author} on ${new Date(blogPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             <div class="description">${descriptionHtml}</div>
-            <a href="${process.env.FRONTEND_URL}/blog/${blogPost._id}" class="cta-button">Read More</a>
+            <a href="${process.env.FRONTEND_URL}/blog-details/${blogPost._id}" class="cta-button">Read More</a>
           </body>
           </html>
         `,
