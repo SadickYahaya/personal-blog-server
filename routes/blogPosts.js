@@ -61,14 +61,22 @@ async function sendNewsletterEmails(blogPost) {
               h1 { color: #2c3e50; }
               .meta { font-style: italic; color: #7f8c8d; }
               .description { margin: 20px 0; }
-              .cta-button { display: inline-block; background-color: #3498db; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; }
+              .button { display: inline-block; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; text-align: center; }
+              .cta-button { background-color: #3498db; color: #ffffff; transition: background-color 0.3s ease; }
+              .cta-button:hover { background-color: #2980b9; }
+              .unsubscribe-button { background-color: #e74c3c; color: #ffffff; margin-top: 20px; font-size: 12px; }
+              .unsubscribe-button:hover { background-color: #c0392b; }
             </style>
           </head>
           <body>
             <h1>${blogPost.title}</h1>
             <p class="meta">By ${blogPost.author} on ${new Date(blogPost.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             <div class="description">${descriptionHtml}</div>
-            <a href="${process.env.FRONTEND_URL}/blog-details/${blogPost._id}" class="cta-button">Read More</a>
+            <a href="${process.env.FRONTEND_URL}/blog-details/${blogPost._id}" class="button cta-button">Read More</a>
+            <div style="margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px;">
+              <p style="font-size: 12px; color: #7f8c8d;">If you no longer wish to receive these emails, you can unsubscribe:</p>
+              <a href="${process.env.FRONTEND_URL}/unsubscribe/${subscriber._id}" class="button unsubscribe-button">Unsubscribe</a>
+            </div>
           </body>
           </html>
         `,

@@ -37,4 +37,32 @@ router.get('/subscribers', async (req, res) => {
   }
 });
 
+// Unsubscribe route
+router.get('/unsubscribe/:id', async (req, res) => {
+  try {
+    const result = await Subscriber.findByIdAndDelete(req.params.id);
+    if (!result) {
+      return res.status(404).send('Subscriber not found');
+    }
+    res.send('You have been successfully unsubscribed');
+  } catch (error) {
+    console.error('Error unsubscribing:', error);
+    res.status(500).send('An error occurred while unsubscribing');
+  }
+});
+
+// New route for unsubscribing
+router.delete('/unsubscribe/:id', async (req, res) => {
+  try {
+    const result = await Subscriber.findByIdAndDelete(req.params.id);
+    if (!result) {
+      return res.status(404).json({ message: 'Subscriber not found' });
+    }
+    res.json({ message: 'Successfully unsubscribed' });
+  } catch (error) {
+    console.error('Error unsubscribing:', error);
+    res.status(500).json({ message: 'An error occurred while unsubscribing' });
+  }
+});
+
 module.exports = router;
