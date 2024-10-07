@@ -13,7 +13,7 @@ const MONGO_URL = process.env.NODE_ENV === 'production'
 
 // Middleware
 app.use(cors({
-  origin: ['https://sadiqoncodes.netlify.app', 'http://localhost:5173'],
+  origin: ['https://sadiqoncodes.netlify.app','https://sadiqoncodes.live', 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
