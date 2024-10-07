@@ -28,19 +28,19 @@ router.post('/', upload.single('image'), async (req, res) => {
     await blogPost.save();
     console.log('Saved blog post:', blogPost);
 
-    // try {
-    //   await sendNewsletterEmails(blogPost);
-    //   console.log('Newsletter emails sent');
-    // } catch (error) {
-    //   console.error('Error sending newsletter emails:', error);
-    // }
+    try {
+      await sendNewsletterEmails(blogPost);
+      console.log('Newsletter emails sent');
+    } catch (error) {
+      console.error('Error sending newsletter emails:', error);
+    }
     
-    // try {
-    //   await postToTwitter(blogPost);
-    //   console.log('Posted to Twitter');
-    // } catch (error) {
-    //   console.error('Error posting to Twitter:', error);
-    // }
+    try {
+      await postToTwitter(blogPost);
+      console.log('Posted to Twitter');
+    } catch (error) {
+      console.error('Error posting to Twitter:', error);
+    }
 
     
     let linkedInPostStatus = 'Not attempted';
