@@ -5,6 +5,7 @@ const { upload } = require('../helpers/imageUpload');
 const Comment = require('../models/Comment'); 
 const { sendNewsletterEmails } = require('../services/emailService');
 const { postToTwitter } = require('../services/twitterService');
+const { postToLinkedIn } = require('../services/linkedinService');
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
@@ -27,18 +28,25 @@ router.post('/', upload.single('image'), async (req, res) => {
     await blogPost.save();
     console.log('Saved blog post:', blogPost);
     
-    try {
-      await sendNewsletterEmails(blogPost);
-      console.log('Newsletter emails sent');
-    } catch (error) {
-      console.error('Error sending newsletter emails:', error);
-    }
+    // try {
+    //   await sendNewsletterEmails(blogPost);
+    //   console.log('Newsletter emails sent');
+    // } catch (error) {
+    //   console.error('Error sending newsletter emails:', error);
+    // }
     
+    // try {
+    //   await postToTwitter(blogPost);
+    //   console.log('Posted to Twitter');
+    // } catch (error) {
+    //   console.error('Error posting to Twitter:', error);
+    // }
+
     try {
-      await postToTwitter(blogPost);
-      console.log('Posted to Twitter');
+      await postToLinkedIn(blogPost);
+      console.log('Successfully posted to LinkedIn');
     } catch (error) {
-      console.error('Error posting to Twitter:', error);
+      console.error('Error posting to LinkedIn:', error);
     }
     
     res.status(201).json(blogPost);
