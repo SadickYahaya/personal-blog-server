@@ -5,7 +5,7 @@ const { upload } = require('../helpers/imageUpload');
 const Comment = require('../models/Comment'); 
 const { sendNewsletterEmails } = require('../services/emailService');
 const { postToTwitter } = require('../services/twitterService');
-const { postToLinkedIn } = require('../services/linkedInService.');
+const { postToLinkedIn } = require('../services/linkedinService.');
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
