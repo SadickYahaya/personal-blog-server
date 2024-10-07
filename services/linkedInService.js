@@ -22,6 +22,48 @@ function stripHtml(html) {
   return dom.window.document.body.textContent || "";
 }
 
+async function registerImage(accessToken, imageUrl) {
+  try {
+    const response = await axios.post(
+      'https://api.linkedin.com/v2/assets?action=registerUpload',
+      {
+        registerUploadRequest: {
+          recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
+          owner: `urn:li:person:${process.env.LINKEDIN_PERSON_ID}`,
+          serviceRelationships: [
+            {
+              relationshipType: 'OWNER',
+              identifier: 'urn:li:userGeneratedContent'
+            }
+          ]
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+    const uploadUrl = response.data.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl;
+    const asset = response.data.value.asset;
+
+    // Upload the image to the provided URL
+    await axios.put(uploadUrl, await axios.get(imageUrl, { responseType: 'arraybuffer' }).then(response => response.data), {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/octet-stream',
+      }
+    });
+
+    return asset;
+  } catch (error) {
+    console.error('Error registering image:', error.response ? error.response.data : error.message);
+    throw error;
+  }
+}
+
 async function postToLinkedIn(blogPost) {
   try {
     const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
@@ -42,6 +84,16 @@ async function postToLinkedIn(blogPost) {
     // Final check to ensure we're within the limit
     const finalPostText = truncateText(postText, 3000);
 
+    // Ensure the image URL is absolute
+    const imageUrl = blogPost.image.startsWith('http') 
+      ? blogPost.image 
+      : `${process.env.IMAGE_URL}${blogPost.image}`;
+
+    console.log('Image URL being registered:', imageUrl);
+
+    // Register the image with LinkedIn
+    const asset = await registerImage(accessToken, imageUrl);
+
     const shareContent = {
       author: `urn:li:person:${process.env.LINKEDIN_PERSON_ID}`,
       lifecycleState: 'PUBLISHED',
@@ -50,19 +102,16 @@ async function postToLinkedIn(blogPost) {
           shareCommentary: {
             text: finalPostText
           },
-          shareMediaCategory: 'ARTICLE',
+          shareMediaCategory: 'IMAGE',
           media: [{
             status: 'READY',
             description: {
-              text: truncateText(blogPost.title, 256)
-            },
-            originalUrl: `${process.env.FRONTEND_URL}/blog-details/${blogPost._id}`,
-            title: {
               text: truncateText(blogPost.title, 200)
             },
-            thumbnails: [{
-              image: blogPost.image.startsWith('http') ? blogPost.image : `${process.env.IMAGE_URL}${blogPost.image}`
-            }]
+            media: asset,
+            title: {
+              text: truncateText(blogPost.title, 200)
+            }
           }]
         }
       },
@@ -70,6 +119,8 @@ async function postToLinkedIn(blogPost) {
         'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC'
       }
     };
+
+    console.log('Full shareContent:', JSON.stringify(shareContent, null, 2));
 
     const response = await axios.post(
       'https://api.linkedin.com/v2/ugcPosts',
