@@ -28,32 +28,7 @@ router.post('/', upload.single('image'), async (req, res) => {
     await blogPost.save();
     console.log('Saved blog post:', blogPost);
 
-    try {
-      await sendNewsletterEmails(blogPost);
-      console.log('Newsletter emails sent');
-    } catch (error) {
-      console.error('Error sending newsletter emails:', error);
-    }
-    
-    try {
-      await postToTwitter(blogPost);
-      console.log('Posted to Twitter');
-    } catch (error) {
-      console.error('Error posting to Twitter:', error);
-    }
-
-    
-    let linkedInPostStatus = 'Not attempted';
-    try {
-      await postToLinkedIn(blogPost);
-      linkedInPostStatus = 'Success';
-      console.log('Successfully posted to LinkedIn');
-    } catch (error) {
-      linkedInPostStatus = 'Failed';
-      console.error('Error posting to LinkedIn:', error);
-    }
-    
-    res.status(201).json({ ...blogPost.toObject(), linkedInPostStatus });
+    res.status(201).json(blogPost);
   } catch (err) {
     console.error('Error saving blog post:', err);
     res.status(500).json({ message: err.message });
@@ -165,6 +140,48 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error('Error deleting blog post:', err);
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Update the route to match the client-side request
+router.post('/:id/send-newsletter', async (req, res) => {
+  try {
+    const blogPost = await BlogPost.findById(req.params.id);
+    if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
+
+    await sendNewsletterEmails(blogPost);
+    res.json({ message: 'Newsletter emails sent successfully' });
+  } catch (error) {
+    console.error('Error sending newsletter emails:', error);
+    res.status(500).json({ message: 'Error sending newsletter emails' });
+  }
+});
+
+// Similarly, update the other routes
+router.post('/:id/post-twitter', async (req, res) => {
+  try {
+    const blogPost = await BlogPost.findById(req.params.id);
+    if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
+
+    await postToTwitter(blogPost);
+    res.json({ message: 'Posted to Twitter successfully' });
+  } catch (error) {
+    console.error('Error posting to Twitter:', error);
+    res.status(500).json({ message: 'Error posting to Twitter' });
+  }
+});
+
+// New route for posting to LinkedIn
+router.post('/:id/post-linkedin', async (req, res) => {
+  try {
+    const blogPost = await BlogPost.findById(req.params.id);
+    if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
+
+    await postToLinkedIn(blogPost);
+    res.json({ message: 'Posted to LinkedIn successfully' });
+  } catch (error) {
+    console.error('Error posting to LinkedIn:', error);
+    res.status(500).json({ message: 'Error posting to LinkedIn' });
   }
 });
 
