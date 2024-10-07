@@ -22,6 +22,57 @@ function stripHtml(html) {
   return dom.window.document.body.textContent || "";
 }
 
+function convertDeltaToStructuredText(delta) {
+  let result = '';
+  let listDepth = 0;
+  let inCodeBlock = false;
+
+  for (const op of delta.ops) {
+    if (typeof op.insert === 'string') {
+      let text = op.insert;
+      
+      if (op.attributes) {
+        if (op.attributes.bold) text = `*${text}*`;
+        if (op.attributes.italic) text = `_${text}_`;
+        if (op.attributes.code) text = `\`${text}\``;
+      }
+
+      if (op.attributes && op.attributes.header) {
+        const headerLevel = op.attributes.header;
+        text = `\n${'#'.repeat(headerLevel)} ${text}\n`;
+      }
+
+      if (op.attributes && op.attributes.list) {
+        const listType = op.attributes.list;
+        const prefix = listType === 'bullet' ? '• ' : `${listDepth + 1}. `;
+        text = `${' '.repeat(listDepth * 2)}${prefix}${text}\n`;
+      } else if (!op.attributes || (!op.attributes.list && !op.attributes.header)) {
+        text += '\n';
+      }
+
+      result += text;
+    } else if (op.insert && op.insert.image) {
+      result += '[Image]\n';
+    }
+
+    if (op.attributes && op.attributes.list) {
+      listDepth++;
+    } else {
+      listDepth = 0;
+    }
+
+    if (op.attributes && op.attributes['code-block'] && !inCodeBlock) {
+      result += '```\n';
+      inCodeBlock = true;
+    } else if ((!op.attributes || !op.attributes['code-block']) && inCodeBlock) {
+      result += '```\n';
+      inCodeBlock = false;
+    }
+  }
+
+  return result.trim();
+}
+
 async function registerImage(accessToken, imageUrl) {
   try {
     const response = await axios.post(
@@ -71,13 +122,11 @@ async function postToLinkedIn(blogPost) {
     // Parse the description content
     const descriptionContent = JSON.parse(blogPost.description);
     
-    // Convert Quill Delta to HTML
-    const descriptionHtml = convertDeltaToHtml(descriptionContent);
+    // Convert Quill Delta to structured text
+    const structuredText = convertDeltaToStructuredText(descriptionContent);
     
-    // Strip HTML and truncate
-    const plainText = stripHtml(descriptionHtml);
     const maxPostLength = 2900; // Leave some room for the title and intro text
-    const truncatedText = truncateText(plainText, maxPostLength);
+    const truncatedText = truncateText(structuredText, maxPostLength);
 
     const postText = `${blogPost.title}\n\n${truncatedText}`;
     
