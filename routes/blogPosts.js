@@ -27,7 +27,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     await blogPost.save();
     console.log('Saved blog post:', blogPost);
-    
+
     // try {
     //   await sendNewsletterEmails(blogPost);
     //   console.log('Newsletter emails sent');
@@ -42,14 +42,18 @@ router.post('/', upload.single('image'), async (req, res) => {
     //   console.error('Error posting to Twitter:', error);
     // }
 
+    
+    let linkedInPostStatus = 'Not attempted';
     try {
       await postToLinkedIn(blogPost);
+      linkedInPostStatus = 'Success';
       console.log('Successfully posted to LinkedIn');
     } catch (error) {
+      linkedInPostStatus = 'Failed';
       console.error('Error posting to LinkedIn:', error);
     }
     
-    res.status(201).json(blogPost);
+    res.status(201).json({ ...blogPost.toObject(), linkedInPostStatus });
   } catch (err) {
     console.error('Error saving blog post:', err);
     res.status(500).json({ message: err.message });

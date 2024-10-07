@@ -47,3 +47,4 @@ app.use('/api/tags', require('./routes/tags'));
 app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/comments', require('./routes/comments')); 
+app.use('/linkedinAuth', require('./routes/linkedinAuth'));
