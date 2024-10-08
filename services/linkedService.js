@@ -26,33 +26,42 @@ function convertDeltaToStructuredText(delta) {
   let result = '';
   let listDepth = 0;
   let inCodeBlock = false;
-  let lastOpWasParagraph = false;
 
   for (const op of delta.ops) {
     if (typeof op.insert === 'string') {
-      let text = op.insert.replace(/\n$/, ''); // Remove trailing newline
+      let text = op.insert;
       
-      if (op.attributes && op.attributes.header) {
-        // Add two newlines before headers if not at the start
-        if (result !== '') text = '\n\n' + text;
-        text += '\n';
-        lastOpWasParagraph = false;
-      } else if (op.attributes && op.attributes.list) {
-        const listType = op.attributes.list;
-        const prefix = listType === 'bullet' ? '• ' : `${listDepth + 1}. `;
-        text = `${' '.repeat(listDepth * 2)}${prefix}${text}\n`;
-        lastOpWasParagraph = false;
-      } else if (text !== '') {
-        // Add two newlines for paragraphs
-        if (lastOpWasParagraph) text = '\n' + text;
-        text += '\n';
-        lastOpWasParagraph = true;
+      if (op.attributes) {
+        // Remove the header formatting
+        // if (op.attributes.header) {
+        //   const headerLevel = op.attributes.header;
+        //   text = `${'#'.repeat(headerLevel)} ${text}`;
+        // }
+        if (op.attributes.bold) {
+          text = `**${text}**`;
+        }
+        if (op.attributes.italic) {
+          text = `*${text}*`;
+        }
+        if (op.attributes.underline) {
+          text = `__${text}__`;
+        }
+        if (op.attributes.strike) {
+          text = `~~${text}~~`;
+        }
+        if (op.attributes.link) {
+          text = `[${text}](${op.attributes.link})`;
+        }
+        if (op.attributes.list) {
+          const listType = op.attributes.list;
+          const prefix = listType === 'bullet' ? '• ' : `${listDepth + 1}. `;
+          text = `${' '.repeat(listDepth * 2)}${prefix}${text}`;
+        }
       }
 
       result += text;
     } else if (op.insert && op.insert.image) {
-      result += '[Image]\n';
-      lastOpWasParagraph = false;
+      result += `![Image](${op.insert.image})`;
     }
 
     if (op.attributes && op.attributes.list) {
@@ -64,16 +73,13 @@ function convertDeltaToStructuredText(delta) {
     if (op.attributes && op.attributes['code-block'] && !inCodeBlock) {
       result += '```\n';
       inCodeBlock = true;
-      lastOpWasParagraph = false;
     } else if ((!op.attributes || !op.attributes['code-block']) && inCodeBlock) {
-      result += '```\n';
+      result += '\n```\n';
       inCodeBlock = false;
-      lastOpWasParagraph = false;
     }
   }
 
-  // Trim any leading/trailing whitespace and ensure no more than two consecutive line breaks
-  return result.trim().replace(/\n{3,}/g, '\n\n');
+  return result.trim();
 }
 
 async function registerImage(accessToken, imageUrl) {
@@ -135,7 +141,7 @@ async function postToLinkedIn(blogPost) {
     const blogPostUrl = `${process.env.FRONTEND_URL}`;
     const callToAction = `\n\nExplore more tech insights on my blog: ${blogPostUrl}\n\n#TechTrends #InnovationInsights #AI #MachineLearning #DigitalTransformation #FutureOfWork #CloudComputing #Cybersecurity #DataScience #TechLeadership`;
 
-    const postText = `${blogPost.title}\n\n${truncatedText}${callToAction}`;
+    const postText = `${truncatedText}${callToAction}`;
     
     // Final check to ensure we're within the limit
     const finalPostText = truncateText(postText, 3000);
