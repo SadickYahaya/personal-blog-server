@@ -26,33 +26,33 @@ function convertDeltaToStructuredText(delta) {
   let result = '';
   let listDepth = 0;
   let inCodeBlock = false;
+  let lastOpWasParagraph = false;
 
   for (const op of delta.ops) {
     if (typeof op.insert === 'string') {
-      let text = op.insert;
+      let text = op.insert.replace(/\n$/, ''); // Remove trailing newline
       
-      if (op.attributes) {
-        if (op.attributes.bold) text = `*${text}*`;
-        if (op.attributes.italic) text = `_${text}_`;
-        if (op.attributes.code) text = `\`${text}\``;
-      }
-
       if (op.attributes && op.attributes.header) {
-        const headerLevel = op.attributes.header;
-        text = `\n${'#'.repeat(headerLevel)} ${text}\n`;
-      }
-
-      if (op.attributes && op.attributes.list) {
+        // Add two newlines before headers if not at the start
+        if (result !== '') text = '\n\n' + text;
+        text += '\n';
+        lastOpWasParagraph = false;
+      } else if (op.attributes && op.attributes.list) {
         const listType = op.attributes.list;
         const prefix = listType === 'bullet' ? '• ' : `${listDepth + 1}. `;
         text = `${' '.repeat(listDepth * 2)}${prefix}${text}\n`;
-      } else if (!op.attributes || (!op.attributes.list && !op.attributes.header)) {
+        lastOpWasParagraph = false;
+      } else if (text !== '') {
+        // Add two newlines for paragraphs
+        if (lastOpWasParagraph) text = '\n' + text;
         text += '\n';
+        lastOpWasParagraph = true;
       }
 
       result += text;
     } else if (op.insert && op.insert.image) {
       result += '[Image]\n';
+      lastOpWasParagraph = false;
     }
 
     if (op.attributes && op.attributes.list) {
@@ -64,13 +64,16 @@ function convertDeltaToStructuredText(delta) {
     if (op.attributes && op.attributes['code-block'] && !inCodeBlock) {
       result += '```\n';
       inCodeBlock = true;
+      lastOpWasParagraph = false;
     } else if ((!op.attributes || !op.attributes['code-block']) && inCodeBlock) {
       result += '```\n';
       inCodeBlock = false;
+      lastOpWasParagraph = false;
     }
   }
 
-  return result.trim();
+  // Trim any leading/trailing whitespace and ensure no more than two consecutive line breaks
+  return result.trim().replace(/\n{3,}/g, '\n\n');
 }
 
 async function registerImage(accessToken, imageUrl) {
@@ -125,10 +128,14 @@ async function postToLinkedIn(blogPost) {
     // Convert Quill Delta to structured text
     const structuredText = convertDeltaToStructuredText(descriptionContent);
     
-    const maxPostLength = 2900; // Leave some room for the title and intro text
+    const maxPostLength = 2650; // Further reduced to accommodate the catchy CTA
     const truncatedText = truncateText(structuredText, maxPostLength);
 
-    const postText = `${blogPost.title}\n\n${truncatedText}`;
+    // Add a more engaging call-to-action with the blog post URL
+    const blogPostUrl = `${process.env.FRONTEND_URL}`;
+    const callToAction = `\n\nExplore more tech insights on my blog: ${blogPostUrl}\n\n#TechTrends #InnovationInsights #AI #MachineLearning #DigitalTransformation #FutureOfWork #CloudComputing #Cybersecurity #DataScience #TechLeadership`;
+
+    const postText = `${blogPost.title}\n\n${truncatedText}${callToAction}`;
     
     // Final check to ensure we're within the limit
     const finalPostText = truncateText(postText, 3000);
