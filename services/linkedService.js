@@ -135,7 +135,7 @@ async function postToLinkedIn(blogPost) {
     const structuredText = convertDeltaToStructuredText(descriptionContent);
     
     // Increase max post length to utilize more of LinkedIn's character limit
-    const maxPostLength = 3800;
+    const maxPostLength = 2800;
     const truncatedText = truncateText(structuredText, maxPostLength);
 
     // Add "Continue reading" prompt if the text was truncated
