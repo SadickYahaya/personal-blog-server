@@ -137,9 +137,38 @@ async function postToLinkedIn(blogPost) {
     const maxPostLength = 2650; // Further reduced to accommodate the catchy CTA
     const truncatedText = truncateText(structuredText, maxPostLength);
 
-    // Add a more engaging call-to-action with the blog post URL
+    const hashtags = [
+      "#TechTrends", "#InnovationInsights", "#AI", "#MachineLearning", "#DigitalTransformation",
+      "#FutureOfWork", "#CloudComputing", "#Cybersecurity", "#DataScience", "#TechLeadership",
+      "#SoftwareDevelopment", "#BigData", "#IoT", "#BlockchainTechnology", "#DevOps",
+      "#ArtificialIntelligence", "#TechInnovation", "#Programming", "#WebDevelopment", "#CodeLife",
+      "#TechBlog", "#IndustryInsights", "#EmergingTech", "#TechNews", "#ITSolutions"
+    ];
+
+    const callToActions = [
+      "Explore more tech insights on my blog:",
+      "Dive deeper into this topic on my blog:",
+      "Want to learn more? Check out my blog:",
+      "For in-depth analysis, visit my tech blog:",
+      "Continue the tech conversation on my blog:",
+      "Discover more cutting-edge insights:",
+      "Expand your tech knowledge. Read more:",
+      "Join the tech discussion on my blog:",
+      "Uncover more tech secrets on my blog:",
+      "Stay ahead in tech. Read more on my blog:"
+    ];
+
+    // Function to get random items from an array
+    const getRandomItems = (array, count) => {
+      const shuffled = array.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    const selectedHashtags = getRandomItems(hashtags, 5).join(" ");
+    const selectedCTA = getRandomItems(callToActions, 1)[0];
+
     const blogPostUrl = `${process.env.FRONTEND_URL}`;
-    const callToAction = `\n\nExplore more tech insights on my blog: ${blogPostUrl}\n\n#TechTrends #InnovationInsights #AI #MachineLearning #DigitalTransformation #FutureOfWork #CloudComputing #Cybersecurity #DataScience #TechLeadership`;
+    const callToAction = `\n\n${selectedCTA} ${blogPostUrl}\n\n${selectedHashtags}`;
 
     const postText = `${truncatedText}${callToAction}`;
     
