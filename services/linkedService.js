@@ -135,8 +135,11 @@ async function postToLinkedIn(blogPost) {
     const structuredText = convertDeltaToStructuredText(descriptionContent);
     
     // Increase max post length to utilize more of LinkedIn's character limit
-    const maxPostLength = 2800;
+    const maxPostLength = 3800;
     const truncatedText = truncateText(structuredText, maxPostLength);
+
+    // Add "Continue reading" prompt if the text was truncated
+    const continueReading = structuredText.length > maxPostLength ? `\n\nContinue reading on my blog: ${process.env.FRONTEND_URL}/blog-details/${blogPost._id} ` : "";
 
     // Enhanced hashtags with more trending and relevant options
     const hashtags = [
@@ -171,13 +174,13 @@ async function postToLinkedIn(blogPost) {
     const selectedHashtags = getRandomItems(hashtags, 7).join(" ");
     const selectedCTA = getRandomItems(callToActions, 1)[0];
 
-    const blogPostUrl = `${process.env.FRONTEND_URL}/blog-details/${blogPost._id}`;
+    const blogPostUrl = `${process.env.FRONTEND_URL}`;
     const callToAction = `\n\n${selectedCTA} ${blogPostUrl}\n\n${selectedHashtags}`;
 
     // Add an attention-grabbing opener
     const opener = `🔥 ${blogPost.title}\n\n`;
 
-    const postText = `${opener}${truncatedText}${callToAction}`;
+    const postText = `${opener}${truncatedText}${continueReading}${callToAction}`;
     
     // Final check to ensure we're within the limit
     const finalPostText = truncateText(postText, 3000);
