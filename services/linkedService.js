@@ -134,28 +134,31 @@ async function postToLinkedIn(blogPost) {
     // Convert Quill Delta to structured text
     const structuredText = convertDeltaToStructuredText(descriptionContent);
     
-    const maxPostLength = 2650; // Further reduced to accommodate the catchy CTA
+    // Increase max post length to utilize more of LinkedIn's character limit
+    const maxPostLength = 2800;
     const truncatedText = truncateText(structuredText, maxPostLength);
 
+    // Enhanced hashtags with more trending and relevant options
     const hashtags = [
-      "#TechTrends", "#InnovationInsights", "#AI", "#MachineLearning", "#DigitalTransformation",
-      "#FutureOfWork", "#CloudComputing", "#Cybersecurity", "#DataScience", "#TechLeadership",
-      "#SoftwareDevelopment", "#BigData", "#IoT", "#BlockchainTechnology", "#DevOps",
-      "#ArtificialIntelligence", "#TechInnovation", "#Programming", "#WebDevelopment", "#CodeLife",
-      "#TechBlog", "#IndustryInsights", "#EmergingTech", "#TechNews", "#ITSolutions"
+      "#TechInnovation", "#AITrends", "#FutureOfTech", "#DataScience", "#CyberSecurity",
+      "#CloudComputing", "#MachineLearning", "#DigitalTransformation", "#TechLeadership",
+      "#EmergingTech", "#SoftwareEngineering", "#BigData", "#IoT", "#Blockchain",
+      "#DevOps", "#ArtificialIntelligence", "#CodeLife", "#TechInsights", "#InnovationMatters",
+      "#TechForGood", "#StartupLife", "#TechCommunity", "#FutureSkills", "#TechTrends2023"
     ];
 
+    // Improved call-to-actions with more engaging language
     const callToActions = [
-      "Explore more tech insights on my blog:",
-      "Dive deeper into this topic on my blog:",
-      "Want to learn more? Check out my blog:",
-      "For in-depth analysis, visit my tech blog:",
-      "Continue the tech conversation on my blog:",
-      "Discover more cutting-edge insights:",
-      "Expand your tech knowledge. Read more:",
-      "Join the tech discussion on my blog:",
-      "Uncover more tech secrets on my blog:",
-      "Stay ahead in tech. Read more on my blog:"
+      "🚀 Dive deeper into this tech revolution on my blog:",
+      "🔍 Uncover game-changing insights on my blog:",
+      "💡 Want to stay ahead in tech? Explore more on my blog:",
+      "🌟 Join the innovation conversation on my blog:",
+      "🔮 Predict the future of tech with me on my blog:",
+      "🧠 Expand your tech mindset on my blog:",
+      "🌐 Navigate the digital frontier on my blog:", 
+      "⚡ Power up your tech knowledge on my blog:",
+      "🎯 Target your tech skills. In-depth analysis awaits:",
+      "🔑 Unlock the secrets of tomorrow's tech. Read on:"
     ];
 
     // Function to get random items from an array
@@ -164,13 +167,17 @@ async function postToLinkedIn(blogPost) {
       return shuffled.slice(0, count);
     };
 
-    const selectedHashtags = getRandomItems(hashtags, 5).join(" ");
+    // Select more hashtags for better discoverability
+    const selectedHashtags = getRandomItems(hashtags, 7).join(" ");
     const selectedCTA = getRandomItems(callToActions, 1)[0];
 
-    const blogPostUrl = `${process.env.FRONTEND_URL}`;
+    const blogPostUrl = `${process.env.FRONTEND_URL}/blog/${blogPost.slug}`;
     const callToAction = `\n\n${selectedCTA} ${blogPostUrl}\n\n${selectedHashtags}`;
 
-    const postText = `${truncatedText}${callToAction}`;
+    // Add an attention-grabbing opener
+    const opener = `🔥 ${blogPost.title}\n\n`;
+
+    const postText = `${opener}${truncatedText}${callToAction}`;
     
     // Final check to ensure we're within the limit
     const finalPostText = truncateText(postText, 3000);
@@ -202,7 +209,13 @@ async function postToLinkedIn(blogPost) {
             media: asset,
             title: {
               text: truncateText(blogPost.title, 200)
-            }
+            },
+            // Add a custom thumbnail if available
+            thumbnails: [
+              {
+                image: asset
+              }
+            ]
           }]
         }
       },
