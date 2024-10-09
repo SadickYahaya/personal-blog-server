@@ -171,7 +171,7 @@ async function postToLinkedIn(blogPost) {
     const selectedHashtags = getRandomItems(hashtags, 7).join(" ");
     const selectedCTA = getRandomItems(callToActions, 1)[0];
 
-    const blogPostUrl = `${process.env.FRONTEND_URL}/blog/${blogPost.slug}`;
+    const blogPostUrl = `${process.env.FRONTEND_URL}/blog-details/${blogPost._id}`;
     const callToAction = `\n\n${selectedCTA} ${blogPostUrl}\n\n${selectedHashtags}`;
 
     // Add an attention-grabbing opener
