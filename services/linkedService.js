@@ -139,7 +139,7 @@ async function postToLinkedIn(blogPost) {
     const truncatedText = truncateText(structuredText, maxPostLength);
 
     // Add "Continue reading" prompt if the text was truncated
-    const continueReading = structuredText.length > maxPostLength ? `\n\nContinue reading on my blog: ${process.env.FRONTEND_URL}/blog-details/${blogPost._id} ` : "";
+    const continueReading = structuredText.length > maxPostLength ? `\n\nContinue reading ->: ${process.env.FRONTEND_URL}/blog-details/${blogPost._id} ` : "";
 
     // Enhanced hashtags with more trending and relevant options
     const hashtags = [
