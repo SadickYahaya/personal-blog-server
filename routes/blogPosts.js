@@ -6,6 +6,7 @@ const Comment = require('../models/Comment');
 const { sendNewsletterEmails } = require('../services/emailService');
 const { postToTwitter } = require('../services/twitterService');
 const { postToLinkedIn } = require('../services/linkedService');
+const { postToFacebook } = require('../services/facebookService');
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
@@ -27,7 +28,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     await blogPost.save();
     console.log('Saved blog post:', blogPost);
-
+    
     res.status(201).json(blogPost);
   } catch (err) {
     console.error('Error saving blog post:', err);
@@ -182,6 +183,20 @@ router.post('/:id/post-linkedin', async (req, res) => {
   } catch (error) {
     console.error('Error posting to LinkedIn:', error);
     res.status(500).json({ message: 'Error posting to LinkedIn' });
+  }
+});
+
+// New route for posting to Facebook
+router.post('/:id/post-facebook', async (req, res) => {
+  try {
+    const blogPost = await BlogPost.findById(req.params.id);
+    if (!blogPost) return res.status(404).json({ message: 'Blog post not found' });
+
+    await postToFacebook(blogPost);
+    res.json({ message: 'Posted to Facebook successfully' });
+  } catch (error) {
+    console.error('Error posting to Facebook:', error);
+    res.status(500).json({ message: 'Error posting to Facebook' });
   }
 });
 
