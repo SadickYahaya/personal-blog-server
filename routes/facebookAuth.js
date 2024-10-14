@@ -25,4 +25,22 @@ router.get('/facebook/token', async (req, res) => {
   }
 });
 
+router.get('/facebook/page-token', async (req, res) => {
+  const { fbUserAccessToken, pageId } = req.query; // Get user access token and page ID from query parameters
+  try {
+    const response = await axios.get(`https://graph.facebook.com/${pageId}?fields=access_token`, {
+      params: {
+        access_token: fbUserAccessToken
+      }
+    });
+
+    const pageAccessToken = response.data.access_token;
+    console.log('Facebook Page Access Token:', pageAccessToken);
+    res.json({ pageAccessToken });
+  } catch (error) {
+    console.error('Error obtaining Facebook page access token:', error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Failed to obtain page access token' });
+  }
+});
+
 module.exports = router;
